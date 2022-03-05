@@ -13,7 +13,9 @@ import threading
 
 def keyboard_callback(key: keyboard.KeyboardEvent) -> None:
     global db
-    db.insert(table="keys", key=key.name.lower(), down=int(key.event_type == keyboard.KEY_DOWN), time=str(key.time))
+    insertion_key = key.name.lower().split()[-1]
+    print(insertion_key)
+    db.insert(table="keys", key=insertion_key, down=int(key.event_type == keyboard.KEY_DOWN), time=str(key.time))
 
 
 def mouse_callback(event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelEvent]) -> None:
