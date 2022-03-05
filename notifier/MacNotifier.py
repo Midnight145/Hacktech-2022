@@ -1,5 +1,6 @@
 import asyncio
 from desktop_notifier import DesktopNotifier, Urgency, Button
+from rubicon.objc.eventloop import EventLoopPolicy
 
 notify = DesktopNotifier()
 response = -1
@@ -38,6 +39,7 @@ def responseN():
 
 
 def run():
+    asyncio.set_event_loop_policy(EventLoopPolicy())
     loop = asyncio.get_event_loop()
     loop.create_task(main())
     loop.run_forever()
