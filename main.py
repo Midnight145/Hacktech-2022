@@ -3,7 +3,7 @@ import time
 import csv
 import mouse
 import keyboard
-from typing import Union, Any
+from typing import Union, Any, List
 import json
 
 import helpers
@@ -13,8 +13,7 @@ import threading
 
 def keyboard_callback(key: keyboard.KeyboardEvent) -> None:
     global db
-    db.insert(table="keys", key=key.name.lower(), down=int(key.event_type == keyboard.KEY_DOWN),
-                  time=str(key.time))
+    db.insert(table="keys", key=key.name.lower(), down=int(key.event_type == keyboard.KEY_DOWN), time=str(key.time))
 
 
 def mouse_callback(event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelEvent]) -> None:
@@ -31,17 +30,17 @@ def key_parse() -> dict:
     global db
 
     # converts each row from database response to dictionary, only returning values within check_rate
-    keys = [dict(i) for i in db.execute(f"SELECT * FROM keys WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
+    keys = [dict(i) for i in
+            db.execute(f"SELECT * FROM keys WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
 
     # used for filtering rows by key
     uniq_keys = []
 
     # supposedly sorts by key
     keys = sorted(keys, key=lambda x: x["key"])
-
     # get all keys pressed
     for i in keys:
-        if i == "command":
+        if i["key"] == "command":
             uniq_keys.append("ctrl")
         else:
             uniq_keys.append(i["key"])
@@ -54,9 +53,9 @@ def key_parse() -> dict:
 
     for key in uniq_keys:
         for row in keys:
-            # only downpress
             if row["key"] == "command":
                 row["key"] = "ctrl"
+            # only downpress
             if row["key"] == key and row["down"] == 1:
                 frequency[key] += 1
 
@@ -67,7 +66,8 @@ def key_parse() -> dict:
 def mouse_button_parse() -> dict:
     global db
     # converts each row from database response to dictionary, only returning values within check_rate
-    buttons = [dict(i) for i in db.execute(f"SELECT * FROM mouse_buttons WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
+    buttons = [dict(i) for i in db.execute(
+        f"SELECT * FROM mouse_buttons WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
 
     # used for filtering row by button
     uniq_buttons = []
@@ -117,7 +117,7 @@ def mouse_button_parse() -> dict:
 #     return json.dumps(jso)
 
 
-def add_rows_to_csv(filename: str, headers: list[str], rows: dict, state: str) -> None:
+def add_rows_to_csv(filename: str, headers: List[str], rows: dict, state: str) -> None:
     rows["state"] = state
     rows["platform"] = helpers.PLATFORM
     try:
@@ -129,7 +129,6 @@ def add_rows_to_csv(filename: str, headers: list[str], rows: dict, state: str) -
         writer = csv.DictWriter(file, fieldnames=headers)
         if write_header:
             writer.writeheader()
-        print(rows)
         writer.writerow(rows)
 
 
@@ -154,7 +153,6 @@ CONFIG_FILE = "config.json"
 
 with open(CONFIG_FILE, 'r') as config:
     config = json.load(config)
-
 
 DATABASE_FILE = config["database_file"]
 db = Database(DATABASE_FILE)
