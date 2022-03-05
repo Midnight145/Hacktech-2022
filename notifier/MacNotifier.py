@@ -2,6 +2,7 @@ import asyncio
 from desktop_notifier import DesktopNotifier, Urgency, Button
 
 notify = DesktopNotifier()
+response = -1
 
 
 async def main():
@@ -12,27 +13,27 @@ async def main():
         buttons=[
             Button(
                 title="Yes!",
-                on_pressed=await responseY()
+                on_pressed=responseY
             ),
             Button(
                 title="No!",
-                on_pressed=await responseN()
+                on_pressed=responseN
             )
         ],
-        on_dismissed=lambda: main(),
+        on_dismissed=main,
         sound=True,
     )
 
 
-async def responseY():
+def responseY():
     global response
-    await notify.send(title="Focus Check!", message="Get Back to Work!", urgency=Urgency.Critical)
+    notify.send_sync(title="Focus Check!", message="Get Back to Work!", urgency=Urgency.Critical)
     response = 1
 
 
-async def responseN():
+def responseN():
     global response
-    await notify.send(title="Focus Check!", message="Apologies for disturbing you.", urgency=Urgency.Low)
+    notify.send_sync(title="Focus Check!", message="Apologies for disturbing you.", urgency=Urgency.Low)
     response = 0
 
 
