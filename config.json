@@ -1,3 +1,6 @@
 {
-
+  "check_rate": 60000,
+  "api_key": "",
+  "api_model": "",
+  "database_file": "spyware.db"
 }
