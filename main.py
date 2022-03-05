@@ -62,6 +62,8 @@ def key_parse() -> dict:
         for row in keys:
             if row["key"] == "command":
                 row["key"] = "ctrl"
+            if row["key"] not in helpers.KEY_HEADERS:
+                row["key"] = "other"
             # only downpress
             if row["key"] == key and row["down"] == 1:
                 frequency[key] += 1
