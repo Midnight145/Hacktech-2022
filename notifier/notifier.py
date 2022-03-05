@@ -1,13 +1,13 @@
 import platform
-import WindowsNotifier
-import MacNotifier
 
 
 def notify():
     global response
     if platform.system() == 'Windows':
+        import WindowsNotifier
         response = WindowsNotifier.run()
     else:
+        import MacNotifier
         response = MacNotifier.run()
 
 
