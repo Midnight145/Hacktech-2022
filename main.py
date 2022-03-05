@@ -1,3 +1,4 @@
+import sys
 import time
 import csv
 import mouse
@@ -118,6 +119,7 @@ def mouse_button_parse() -> dict:
 
 def add_rows_to_csv(filename: str, headers: list[str], rows: dict, state: str) -> None:
     rows["state"] = state
+    rows["platform"] = helpers.PLATFORM
     try:
         with open(filename, "r") as file:
             write_header = len(file.readlines()) == 0
@@ -159,15 +161,17 @@ db = Database(DATABASE_FILE)
 
 #  lambda function allows for passing safe_call into the keyboard hook instead of the keyboard callback directly
 keyboard.hook(lambda y: safe_call(lambda: keyboard_callback(y)))
-mouse.hook(lambda y: safe_call(lambda: mouse_callback(y)))
+if not sys.platform == 'darwin':
+    mouse.hook(lambda y: safe_call(lambda: mouse_callback(y)))
 
-print(safe_call(key_parse))
-print(safe_call(mouse_button_parse))
 state = "distracted"
 
 while True:
     time.sleep(config["check_rate"])
     key_resp = safe_call(key_parse)
-    mouse_resp = safe_call(mouse_button_parse)
+    if not helpers.PLATFORM == 'darwin':
+        mouse_resp = safe_call(mouse_button_parse)
+    else:
+        mouse_resp = {}
     add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
     add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
