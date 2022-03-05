@@ -2,5 +2,7 @@
   "check_rate": 60000,
   "api_key": "",
   "api_model": "",
-  "database_file": "spyware.db"
+  "database_file": "focus.db",
+  "key_data_file": "key_data.csv",
+  "mouse_data_file": "mouse_data.csv"
 }
