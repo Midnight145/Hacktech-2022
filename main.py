@@ -41,7 +41,7 @@ def key_parse() -> dict:
     # get all keys pressed
     for i in keys:
         if i == "command":
-            uniq_keys.append("ctrl")\
+            uniq_keys.append("ctrl")
         else:
             uniq_keys.append(i["key"])
 
