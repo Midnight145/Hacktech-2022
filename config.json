@@ -1,5 +1,5 @@
 {
-  "check_rate": 60000,
+  "check_rate": 60,
   "api_key": "",
   "api_model": "",
   "database_file": "focus.db",
