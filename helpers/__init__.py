@@ -8,7 +8,7 @@ else:
 
 
 KEY_HEADERS = list(string.printable[:-6])
-KEY_HEADERS += ["esc", "enter", "delete", "ctrl", "left", "up", "right", "down", "backspace", "tab", "space", "windows", "alt", "shift"]
+KEY_HEADERS += ["esc", "enter", "delete", "ctrl", "left", "up", "right", "down", "backspace", "tab", "space", "windows", "alt", "shift", 'insert', 'menu', 'lock', 'screen', 'end', 'pause', 'home', "ƒ", "other"]
 KEY_HEADERS.append('state')
 KEY_HEADERS.append('platform')
 
