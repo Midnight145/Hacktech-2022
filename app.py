@@ -17,6 +17,7 @@ class LoggerWorker(QObject):
 
         print("Running!")
         # Start Process Keylogger
+
     def stop(self):
         self.running = False
 
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow):
         self.logThread.quit()
         self.logThread.wait()
         print("Thread Stopped!")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
