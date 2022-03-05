@@ -1,4 +1,3 @@
-import string
 import time
 import csv
 import mouse
@@ -41,7 +40,10 @@ def key_parse() -> dict:
 
     # get all keys pressed
     for i in keys:
-        uniq_keys.append(i["key"])
+        if i == "command":
+            uniq_keys.append("ctrl")\
+        else:
+            uniq_keys.append(i["key"])
 
     # filter out duplicates
     uniq_keys = list(set(uniq_keys))
@@ -52,6 +54,8 @@ def key_parse() -> dict:
     for key in uniq_keys:
         for row in keys:
             # only downpress
+            if row["key"] == "command":
+                row["key"] = "ctrl"
             if row["key"] == key and row["down"] == 1:
                 frequency[key] += 1
 
