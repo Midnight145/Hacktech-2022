@@ -1,9 +1,12 @@
+import string
 import time
-
+import csv
 import mouse
 import keyboard
 from typing import Union, Any
 import json
+
+import helpers
 from helpers.Database import Database
 import threading
 
@@ -109,6 +112,21 @@ def mouse_button_parse() -> dict:
 #     return json.dumps(jso)
 
 
+def add_rows_to_csv(filename: str, headers: list[str], rows: dict, state: str) -> None:
+    rows["state"] = state
+    try:
+        with open(filename, "r") as file:
+            write_header = len(file.readlines()) == 0
+    except FileNotFoundError:
+        write_header = True
+    with open(filename, "a", newline="\n") as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        if write_header:
+            writer.writeheader()
+        print(rows)
+        writer.writerow(rows)
+
+
 def safe_call(func: callable) -> Any:
     """
     Assures thread-safe reads/writes to the database
@@ -141,3 +159,11 @@ mouse.hook(lambda y: safe_call(lambda: mouse_callback(y)))
 
 print(safe_call(key_parse))
 print(safe_call(mouse_button_parse))
+state = "distracted"
+
+while True:
+    time.sleep(config["check_rate"])
+    key_resp = safe_call(key_parse)
+    mouse_resp = safe_call(mouse_button_parse)
+    add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
+    add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
