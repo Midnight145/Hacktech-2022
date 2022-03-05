@@ -13,8 +13,13 @@ import threading
 
 def keyboard_callback(key: keyboard.KeyboardEvent) -> None:
     global db
+    if key.name is None:
+        return
+
     insertion_key = key.name.lower().split()[-1]
-    print(insertion_key)
+    if "option" in insertion_key:
+        insertion_key = "alt"
+
     db.insert(table="keys", key=insertion_key, down=int(key.event_type == keyboard.KEY_DOWN), time=str(key.time))
 
 
