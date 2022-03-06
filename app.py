@@ -49,13 +49,7 @@ class Graph(QWidget):
         x = list(df)
         y = list(df.iloc[-1])
 
-        print(df)
-
         y = [0 if pd.isnull(i) else i for i in y]
-
-        print(f'{x}')
-        print(f'{y}')
-
 
         self._data = [
             #[1, 2, 3, 4, 5, 4, 3, 2, 1],
@@ -95,11 +89,6 @@ class Graph(QWidget):
     def timerEvent(self, event: QTimerEvent) -> None:
         if self._timerId != event.timerId():
             return
-
-        # Replace the data in the existing series
-        #self._currentDataIdx = 1 if not self._currentDataIdx else 0
-        #for i, n in enumerate(self._data[self._currentDataIdx]):
-        #    self._barSet.replace(i, n)
 
         df = pd.read_csv("key_data.csv")
         df = df.iloc[:, :-2]
@@ -183,6 +172,77 @@ class OverallPie(QWidget):
         self.chartview.update()
 
 
+
+class SessionPie(QWidget):
+    def __init__(self, parent=None, **kwargs):
+        super(SessionPie, self).__init__(parent, **kwargs)
+
+        self.total_focus = 0
+        self.total_distracted = 0
+        self.total_afk = 0
+        self.total = 0
+
+        self.OPieList = [self.total_afk, self.total_focus, self.total_distracted]
+
+        df = pd.read_csv("key_data.csv")
+        i = "".join(list(df.iloc[-1, -2]))
+
+        if i == "unresponsive":
+            self.OPieList[0] += 1
+        elif i == "focused":
+            self.OPieList[1] += 1
+        else:
+            self.OPieList[2] += 1
+
+        self.total += 1
+
+        self.series = QPieSeries()
+
+        self.AFK = QPieSlice("AFK", self.OPieList[0] / self.total)
+        self.Focused = QPieSlice("Focused", self.OPieList[1] / self.total)
+        self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
+
+        self.series.append([self.AFK, self.Focused, self.Distracted])
+
+        self.chart = QChart()
+        self.chart.legend().hide()
+        self.chart.addSeries(self.series)
+        self.chart.setTitle("Overall Distractiveness")
+
+        self.chart.legend().setVisible(True)
+        self.chart.legend().setAlignment(Qt.AlignBottom)
+
+        self.chartview = QChartView(self.chart)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.chartview)
+        self.setLayout(self.layout)
+
+        self._timerId = self.startTimer(60000)
+
+    def timerEvent(self, event: QTimerEvent):
+        if self._timerId != event.timerId():
+            return
+
+        df = pd.read_csv("key_data.csv")
+        i = "".join(list(df.iloc[-1, -2]))
+
+        if i == "unresponsive":
+            self.OPieList[0] += 1
+        elif i == "focused":
+            self.OPieList[1] += 1
+        else:
+            self.OPieList[2] += 1
+
+        self.total += 1
+
+        self.series.remove(self.Distracted)
+        self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
+        self.series.append(self.Distracted)
+
+        self.chartview.update()
+
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None, *args, **kwargs):
         super(MainWindow, self).__init__(parent, *args, **kwargs)
@@ -203,9 +263,13 @@ class MainWindow(QMainWindow):
         self.tool_btn.clicked.connect(self.show_table)
         self.toolbar.addWidget(self.tool_btn)
 
-        self.tool_btn2 = QPushButton("Distracted Pie Chart")
-        self.tool_btn2.clicked.connect(self.show_pie)
+        self.tool_btn2 = QPushButton("Overall Pie Chart")
+        self.tool_btn2.clicked.connect(self.show_Opie)
         self.toolbar.addWidget(self.tool_btn2)
+
+        self.tool_btn3 = QPushButton("Session Pie Chart")
+        self.tool_btn3.clicked.connect(self.show_Spie)
+        self.toolbar.addWidget(self.tool_btn3)
 
         self.setCentralWidget(self.btn)
 
@@ -217,9 +281,14 @@ class MainWindow(QMainWindow):
         self.obj.finished.connect(self.thread.quit)
         self.thread.started.connect(self.obj.run)
 
-    def show_pie(self) -> None:
+
+    def show_Opie(self):
         self.opie = OverallPie()
         self.opie.show()
+
+    def show_Spie(self):
+        self.spie = SessionPie()
+        self.spie.show()
 
     def show_table(self):
         self.table = Graph()
