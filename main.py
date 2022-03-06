@@ -123,7 +123,11 @@ class Handler:
         return frequency
 
     def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> bool:
-        rows["state"] = state
+        if len(rows) == 0:
+            rows["state"] = helpers.EMPTY
+        else:
+            rows["state"] = state
+
         rows["platform"] = helpers.PLATFORM
         try:
             with open(filename, "r") as file:
@@ -173,7 +177,7 @@ keyboard.hook(lambda y: handler.safe_call(lambda: handler.keyboard_callback(y)))
 if not sys.platform == 'darwin':
     mouse.hook(lambda y: handler.safe_call(lambda: handler.mouse_callback(y)))
 
-state = "focused"
+state = helpers.DISTRACTED
 
 while True:
     time.sleep(config["check_rate"])

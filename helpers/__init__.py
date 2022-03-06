@@ -8,6 +8,8 @@ else:
 
 DISTRACTED = "distracted"
 FOCUSED = "focused"
+EMPTY = "unresponsive"
+UNRESPONSIVE = EMPTY
 
 SPECIAL_MAP = {'!': "excla", '"': 'dquote', '#': 'pound', '$': 'dollar', '%': 'percent', '&': 'ampersand',
                '\'': 'squote', '(': 'lparen', ')': 'rparen', '*': 'asterisk', '+': 'plus', ',': 'comma', '-': 'minus',
