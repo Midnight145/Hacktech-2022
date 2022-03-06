@@ -132,15 +132,17 @@ class OverallPie(QWidget):
             else:
                 self.total_afk += 1
 
-        total = self.total_focus + self.total_afk + self.total_distracted
+        self.total = self.total_focus + self.total_afk + self.total_distracted
 
-        self.OPieList = [self.total_afk/self.total, self.total_focus/self.total, self.total_distracted/self.total]
+        self.OPieList = [self.total_afk, self.total_focus, self.total_distracted]
 
         self.series = QPieSeries()
 
-        self.series.append("AFK", self.OPieList[0])
-        self.series.append("Focused", self.OPieList[1])
-        self.series.append("Distracted", self.OPieList[2])
+        self.AFK = QPieSlice("AFK", self.OPieList[0]/self.total)
+        self.Focused = QPieSlice("Focused", self.OPieList[1]/self.total)
+        self.Distracted = QPieSlice("Distracted", self.OPieList[2]/self.total)
+
+        self.series.append([self.AFK, self.Focused, self.Distracted])
 
         self.chart = QChart()
         self.chart.legend().hide()
@@ -163,19 +165,26 @@ class OverallPie(QWidget):
             return
 
         df = pd.read_csv("key_data.csv")
-        i = str(list(df.iloc[-1, -2]))
+        i = "".join(list(df.iloc[-1, -2]))
 
-        if i == "focused":
+        if i == "unresponsive":
+            self.OPieList[0] += 1
+        elif i == "focused":
             self.OPieList[1] += 1
-        elif i == "distracted":
-            self.OPieList[2] += 1
         else:
-            self.OPieList[3] += 1
+            self.OPieList[2] += 1
 
-        # Replace the data in the existing series
-        # self._currentDataIdx = 1 if not self._currentDataIdx else 0
-        # for i, n in enumerate(self._data[self._currentDataIdx]):
-        #    self._barSet.replace(i, n)
+        self.total += 1
+
+        self.series.remove(self.Distracted)
+        self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
+        self.series.append(self.Distracted)
+
+        self.chartview.update()
+
+
+
+
 
 
 
