@@ -4,3 +4,4 @@ testing.py
 **/__pycache__/
 *.csv
 config.json
+config.json
