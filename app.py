@@ -1,21 +1,21 @@
-import math
-import traceback
+import time  # Standard Library
 
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtCharts import *
-import time
-
-import numpy
-
-import pyqtgraph as pg
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qtagg import FigureCanvasQT, NavigationToolbar2QT
-from matplotlib.figure import Figure
+from PySide6.QtCharts import (  # Gui Packages
+    QBarSet, QBarSeries, QChart, QChartView,
+    QPieSeries, QPieSlice
+)
+from PySide6.QtCore import (
+    QObject, Signal, Slot, QTimerEvent, QThread
+)
+from PySide6.QtGui import Qt
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QMainWindow,
+    QPushButton, QPlainTextEdit, QToolBar,
+    QApplication
+)
 
-import main
+import main  # Local Source
 from notifier.notifier import notify
 
 handler = main.handler
@@ -33,7 +33,6 @@ class Worker(QObject):
             api_resp = main.run()
             if api_resp == 'distracted':
                 notify()
-            print("tick")
 
     def stop(self) -> None:
         self.finished.emit()
@@ -51,11 +50,7 @@ class Graph(QWidget):
 
         y = [0 if pd.isnull(i) else i for i in y]
 
-        self._data = [
-            #[1, 2, 3, 4, 5, 4, 3, 2, 1],
-            #[5, 4, 3, 2, 1, 2, 3, 4, 5]
-            y, x
-        ]
+        self._data = [y, x]
         self._currentDataIdx = 0
 
         self._barSet = QBarSet("Key Usage per min")
@@ -172,7 +167,6 @@ class OverallPie(QWidget):
         self.chartview.update()
 
 
-
 class SessionPie(QWidget):
     def __init__(self, parent=None, **kwargs):
         super(SessionPie, self).__init__(parent, **kwargs)
@@ -251,7 +245,7 @@ class MainWindow(QMainWindow):
 
         self.btn = QPushButton("Start Focus Monitor")
         self.btn.setCheckable(True)
-        self.btn.clicked.connect(self.start_keylogger)
+        self.btn.clicked.connect(self.start_app)
 
         self.text = QPlainTextEdit()
         self.text.setReadOnly(True)
@@ -264,11 +258,11 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.tool_btn)
 
         self.tool_btn2 = QPushButton("Overall Pie Chart")
-        self.tool_btn2.clicked.connect(self.show_Opie)
+        self.tool_btn2.clicked.connect(self.show_opie)
         self.toolbar.addWidget(self.tool_btn2)
 
         self.tool_btn3 = QPushButton("Session Pie Chart")
-        self.tool_btn3.clicked.connect(self.show_Spie)
+        self.tool_btn3.clicked.connect(self.show_spie)
         self.toolbar.addWidget(self.tool_btn3)
 
         self.setCentralWidget(self.btn)
@@ -276,17 +270,15 @@ class MainWindow(QMainWindow):
         self.obj = Worker()
         self.thread = QThread()
 
-        #self.obj.ready.connect(self)
         self.obj.moveToThread(self.thread)
         self.obj.finished.connect(self.thread.quit)
         self.thread.started.connect(self.obj.run)
 
-
-    def show_Opie(self):
+    def show_opie(self):
         self.opie = OverallPie()
         self.opie.show()
 
-    def show_Spie(self):
+    def show_spie(self):
         self.spie = SessionPie()
         self.spie.show()
 
@@ -294,7 +286,7 @@ class MainWindow(QMainWindow):
         self.table = Graph()
         self.table.show()
 
-    def start_keylogger(self, pressed):
+    def start_app(self, pressed):
         if pressed:
             handler.running = True
             self.btn.setText("Stop Focus Monitor")
