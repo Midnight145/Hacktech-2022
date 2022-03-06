@@ -193,8 +193,9 @@ if not sys.platform == 'darwin':
 
 state = helpers.DISTRACTED
 
-while True:
-    time.sleep(config["check_rate"])
+
+def run():
+    #time.sleep(config["check_rate"])
     key_resp = handler.safe_call(handler.key_parse)
     if not helpers.PLATFORM == 'darwin':
         mouse_resp = handler.safe_call(handler.mouse_button_parse)

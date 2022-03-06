@@ -5,6 +5,7 @@ from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 from PySide6.QtCharts import *
+import time
 
 import numpy
 
@@ -14,24 +15,22 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQT, NavigationToolbar2QT
 from matplotlib.figure import Figure
 
+import main
 
-# Key = 119, Mouse = 12
 
+class Worker(QObject):
+    finished = Signal()
+    ready = Signal(int)
 
-class LoggerWorker(QObject):
-    def __init__(self):
-        super(LoggerWorker, self).__init__()
-        self.running = True
-
-    def start(self):
-        if not self.running:
-            self.running = True
-
-        print("Running!")
-        # Start Process Keylogger
+    @Slot()
+    def run(self):
+        while True:
+            time.sleep(60)
+            main.run()
+            print("tick")
 
     def stop(self):
-        self.running = False
+        self.finished.emit()
 
 
 class Graph(QWidget):
@@ -81,7 +80,6 @@ class Graph(QWidget):
 
         self._chartView = QChartView(self._chart)
 
-        #self.setCentralWidget(self._chartView)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self._chartView)
         self.setLayout(self.layout)
@@ -97,7 +95,7 @@ class Graph(QWidget):
         #for i, n in enumerate(self._data[self._currentDataIdx]):
         #    self._barSet.replace(i, n)
 
-        df = pd.read_csv("key_data.csv", on_bad_lines='skip')
+        df = pd.read_csv("key_data.csv")
         df = df.iloc[:, :-2]
 
         y = list(df.iloc[-1])
@@ -106,7 +104,73 @@ class Graph(QWidget):
         self._currentDataIdx = 1
         for i, n in enumerate(y):
             self._barSet.replace(i, n)
-        print(f'{y}')
+
+
+class OverallPie(QWidget):
+    def __init__(self, parent=None, **kwargs):
+        super(OverallPie, self).__init__(parent, **kwargs)
+
+        df = pd.read_csv("key_data.csv")
+        df = list(df.iloc[:, -2])
+
+        self.total_focus = 0
+        self.total_distracted = 0
+        self.total_afk = 0
+        self.total = 0
+
+        for i in df:
+            if i == "focused":
+                self.total_focus += 1
+            elif i == "distracted":
+                self.total_distracted += 1
+            else:
+                self.total_afk += 1
+
+        total = self.total_focus + self.total_afk + self.total_distracted
+
+        self.OPieList = [self.total_afk/self.total, self.total_focus/self.total, self.total_distracted/self.total]
+
+        self.series = QPieSeries()
+
+        self.series.append("AFK", self.OPieList[0])
+        self.series.append("Focused", self.OPieList[1])
+        self.series.append("Distracted", self.OPieList[2])
+
+        self.chart = QChart()
+        self.chart.legend().hide()
+        self.chart.addSeries(self.series)
+        self.chart.setTitle("Overall Distractiveness")
+
+        self.chart.legend().setVisible(True)
+        self.chart.legend().setAlignment(Qt.AlignBottom)
+
+        self.chartview = QChartView(self.chart)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.chartview)
+        self.setLayout(self.layout)
+
+        self._timerId = self.startTimer(60000)
+
+    def timerEvent(self, event: QTimerEvent):
+        if self._timerId != event.timerId():
+            return
+
+        df = pd.read_csv("key_data.csv")
+        i = str(list(df.iloc[-1, -2]))
+
+        if i == "focused":
+            self.OPieList[1] += 1
+        elif i == "distracted":
+            self.OPieList[2] += 1
+        else:
+            self.OPieList[3] += 1
+
+        # Replace the data in the existing series
+        # self._currentDataIdx = 1 if not self._currentDataIdx else 0
+        # for i, n in enumerate(self._data[self._currentDataIdx]):
+        #    self._barSet.replace(i, n)
+
 
 
 class MainWindow(QMainWindow):
@@ -115,7 +179,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Focus Checker")
 
-        self.btn = QPushButton("Start Keylogger")
+        self.btn = QPushButton("Start Focus Monitor")
         self.btn.setCheckable(True)
         self.btn.clicked.connect(self.start_keylogger)
 
@@ -125,16 +189,27 @@ class MainWindow(QMainWindow):
         self.toolbar = QToolBar("Tools")
         self.addToolBar(self.toolbar)
 
-        self.tool_btn = QPushButton("Show Table")
+        self.tool_btn = QPushButton("Keypress Bar Graph")
         self.tool_btn.clicked.connect(self.show_table)
         self.toolbar.addWidget(self.tool_btn)
 
-        self.logThread = QThread()
-        self.logThread.start()
-        self.worker = LoggerWorker()
-        self.worker.moveToThread(self.logThread)
+        self.tool_btn2 = QPushButton("Distracted Pie Chart")
+        self.tool_btn2.clicked.connect(self.show_pie)
+        self.toolbar.addWidget(self.tool_btn2)
 
         self.setCentralWidget(self.btn)
+
+        self.obj = Worker()
+        self.thread = QThread()
+
+        #self.obj.ready.connect(self)
+        self.obj.moveToThread(self.thread)
+        self.obj.finished.connect(self.thread.quit)
+        self.thread.started.connect(self.obj.run)
+
+    def show_pie(self):
+        self.opie = OverallPie()
+        self.opie.show()
 
     def show_table(self):
         self.table = Graph()
@@ -142,18 +217,12 @@ class MainWindow(QMainWindow):
 
     def start_keylogger(self, pressed):
         if pressed:
-            self.btn.setText("Stop Keylogger")
-            self.worker.start()
-        else:
-            self.btn.setText("Start Keylogger")
-            self.worker.stop()
-            self.stop_thread()
+            self.btn.setText("Stop Focus Monitor")
+            self.thread.start()
 
-    def stop_thread(self):
-        self.worker.stop()
-        self.logThread.quit()
-        self.logThread.wait()
-        print("Thread Stopped!")
+        else:
+            self.btn.setText("Start Focus Monitor")
+            self.thread.terminate()
 
 
 if __name__ == "__main__":
