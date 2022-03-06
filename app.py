@@ -38,13 +38,13 @@ class Graph(QWidget):
     def __init__(self, parent=None, **kwargs):
         super(Graph, self).__init__(parent, **kwargs)
 
-        df = pd.read_csv("key_data.csv", encoding='unicode_escape')
-        df = df.iloc[:,:-2]
+        df = pd.read_csv("key_data.csv")
+        df = df.iloc[:, :-2]
 
         x = list(df)
         y = list(df.iloc[-1])
 
-        print(type(y[7]))
+        print(df)
 
         y = [0 if pd.isnull(i) else i for i in y]
 
@@ -86,16 +86,27 @@ class Graph(QWidget):
         self.layout.addWidget(self._chartView)
         self.setLayout(self.layout)
 
-        #self._timerId = self.startTimer(60000)
+        self._timerId = self.startTimer(60000)
 
     def timerEvent(self, event: QTimerEvent):
         if self._timerId != event.timerId():
             return
 
         # Replace the data in the existing series
-        self._currentDataIdx = 1 if not self._currentDataIdx else 0
-        for i, n in enumerate(self._data[self._currentDataIdx]):
+        #self._currentDataIdx = 1 if not self._currentDataIdx else 0
+        #for i, n in enumerate(self._data[self._currentDataIdx]):
+        #    self._barSet.replace(i, n)
+
+        df = pd.read_csv("key_data.csv", on_bad_lines='skip')
+        df = df.iloc[:, :-2]
+
+        y = list(df.iloc[-1])
+        y = [0 if pd.isnull(i) else i for i in y]
+
+        self._currentDataIdx = 1
+        for i, n in enumerate(y):
             self._barSet.replace(i, n)
+        print(f'{y}')
 
 
 class MainWindow(QMainWindow):
