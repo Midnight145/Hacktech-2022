@@ -112,8 +112,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.btn)
 
     def show_table(self):
-        table = Graph()
-        table.show()
+        self.table = Graph()
+        self.table.show()
 
     def start_keylogger(self, pressed):
         if pressed:
