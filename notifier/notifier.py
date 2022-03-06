@@ -4,7 +4,8 @@ import platform
 def notify():
     global response
     if platform.system() == 'Windows':
-        import WindowsNotifier
+
+        from . import WindowsNotifier
         response = WindowsNotifier.run()
     else:
         import MacNotifier
