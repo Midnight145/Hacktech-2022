@@ -5,7 +5,7 @@ import time
 import csv
 import mouse
 import keyboard
-from typing import Union, Any, List
+from typing import Union, Any
 import json
 
 import helpers
@@ -123,7 +123,7 @@ class Handler:
 
         return frequency
 
-    def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> dict:
+    def add_rows_to_csv(self, filename: str, headers: list[str], rows: dict, state: str) -> dict:
         if len(rows) == 0:
             rows["state"] = helpers.EMPTY
         else:
@@ -145,6 +145,20 @@ class Handler:
             except:
                 pass
         return rows
+
+
+    def api_call(self, rows: dict, headers: list[str]):
+        rows["platform"] = helpers.PLATFORM
+        rows["state"] = helpers.DUMMY_STATE
+        print(rows)
+        prediction = helpers.call_api(create_mageinfo(), rows)
+
+        print("testing...")
+        # mouse_resp = helpers.call_api(create_mageinfo(), [mouse_dict])
+
+        return prediction
+
+
 
     def safe_call(self, func: callable) -> Any:
         """
@@ -171,9 +185,9 @@ def test(key_dict: dict, mouse_dict: dict):
 
 
 def create_mageinfo():
-    mage_config = config["mage"][0]
-    print(mage_config)
+    mage_config = config["mage"][0]  # returns a list of length 1, need only item
     mage_obj = {"apiKey": mage_config["api_key"], "model": mage_config["model"], "version": mage_config["version"]}
+    # create mage object, sanity check
     return mage_obj
 
 
@@ -193,8 +207,6 @@ keyboard.hook(lambda y: handler.safe_call(lambda: handler.keyboard_callback(y)))
 if not sys.platform == 'darwin':
     mouse.hook(lambda y: handler.safe_call(lambda: handler.mouse_callback(y)))
 
-state = helpers.DISTRACTED
-
 
 def run():
     key_resp = handler.safe_call(handler.key_parse)
@@ -202,7 +214,10 @@ def run():
         mouse_resp = handler.safe_call(handler.mouse_button_parse)
     else:
         mouse_resp = {}
-    key_dict = handler.add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
-    mouse_dict = handler.add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
+    print(key_resp)
+    prediction = handler.api_call(key_resp, helpers.KEY_HEADERS)
+    handler.add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, prediction)
+    mouse_dict = handler.add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, prediction)
     handler.safe_call(handler.key_parse)
-    return test(key_dict, mouse_dict)
+    print(prediction)
+    return prediction

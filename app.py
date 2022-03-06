@@ -27,7 +27,7 @@ class Worker(QObject):
     ready = Signal(int)
 
     @Slot()
-    def run(self):
+    def run(self) -> None:
         while True:
             time.sleep(config["check_rate"])
             api_resp = main.run()
@@ -35,7 +35,7 @@ class Worker(QObject):
                 notify()
             print("tick")
 
-    def stop(self):
+    def stop(self) -> None:
         self.finished.emit()
 
 
@@ -86,7 +86,7 @@ class Graph(QWidget):
 
         self._timerId = self.startTimer(60000)
 
-    def timerEvent(self, event: QTimerEvent):
+    def timerEvent(self, event: QTimerEvent) -> None:
         if self._timerId != event.timerId():
             return
 
@@ -102,7 +102,7 @@ class Graph(QWidget):
 
 
 class OverallPie(QWidget):
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent=None, **kwargs) -> None:
         super(OverallPie, self).__init__(parent, **kwargs)
 
         df = pd.read_csv("key_data.csv")
@@ -149,7 +149,7 @@ class OverallPie(QWidget):
 
         self._timerId = self.startTimer(60000)
 
-    def timerEvent(self, event: QTimerEvent):
+    def timerEvent(self, event: QTimerEvent) -> None:
         if self._timerId != event.timerId():
             return
 
@@ -170,6 +170,7 @@ class OverallPie(QWidget):
         self.series.append(self.Distracted)
 
         self.chartview.update()
+
 
 
 class SessionPie(QWidget):
@@ -279,6 +280,7 @@ class MainWindow(QMainWindow):
         self.obj.moveToThread(self.thread)
         self.obj.finished.connect(self.thread.quit)
         self.thread.started.connect(self.obj.run)
+
 
     def show_Opie(self):
         self.opie = OverallPie()
