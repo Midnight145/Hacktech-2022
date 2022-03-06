@@ -170,7 +170,7 @@ keyboard.hook(lambda y: handler.safe_call(lambda: handler.keyboard_callback(y)))
 if not sys.platform == 'darwin':
     mouse.hook(lambda y: handler.safe_call(lambda: handler.mouse_callback(y)))
 
-state = "distracted"
+state = "focused"
 
 while True:
     time.sleep(config["check_rate"])
