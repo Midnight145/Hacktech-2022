@@ -224,18 +224,22 @@ class SessionPie(QWidget):
         df = pd.read_csv("key_data.csv")
         i = "".join(list(df.iloc[-1, -2]))
 
+        self.total += 1
         if i == "unresponsive":
             self.OPieList[0] += 1
+            self.series.remove(self.AFK)
+            self.AFK = QPieSlice("AFK", self.OPieList[0] / self.total)
+            self.series.append(self.AFK)
         elif i == "focused":
             self.OPieList[1] += 1
+            self.series.remove(self.Focused)
+            self.Focused = QPieSlice("Focused", self.OPieList[1] / self.total)
+            self.series.append(self.Focused)
         else:
             self.OPieList[2] += 1
-
-        self.total += 1
-
-        self.series.remove(self.Distracted)
-        self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
-        self.series.append(self.Distracted)
+            self.series.remove(self.Distracted)
+            self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
+            self.series.append(self.Distracted)
 
         self.chartview.update()
 
