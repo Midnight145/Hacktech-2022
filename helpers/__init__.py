@@ -6,6 +6,9 @@ if sys.platform == 'darwin':
 else:
     PLATFORM = 'windows'
 
+DISTRACTED = "distracted"
+FOCUSED = "focused"
+
 SPECIAL_MAP = {'!': "excla", '"': 'dquote', '#': 'pound', '$': 'dollar', '%': 'percent', '&': 'ampersand',
                '\'': 'squote', '(': 'lparen', ')': 'rparen', '*': 'asterisk', '+': 'plus', ',': 'comma', '-': 'minus',
                '.': 'period', '/': 'fslash', ':': 'colon', ';': 'semicolon', '<': 'lthan','=': 'equals', '>': 'gthan',
@@ -25,6 +28,3 @@ MOUSE_HEADERS = ["left_single", "left_double", "right_single", "right_double", "
                  "x_single", "x_double", "x2_single", "x2_double"]
 MOUSE_HEADERS.append('state')
 MOUSE_HEADERS.append('platform')
-
-# todo:  ,/,:,;,<,=,>,?,@,[,\,],^,_,`,{,|,},~
-# '\\': 'backslash',
