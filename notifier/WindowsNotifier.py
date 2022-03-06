@@ -6,7 +6,7 @@ mutex = Lock()
 notif_done = multiprocessing.Event()
 
 zroya.init(
-    app_name="Focus Checker",
+    app_name="Focus Monitor",
     company_name="Code Monkeys",
     product_name="Notifier",
     sub_product="Windows_Notifier",
