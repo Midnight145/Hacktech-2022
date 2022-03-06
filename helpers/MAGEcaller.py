@@ -51,14 +51,9 @@ def call_api(mage_info, last_minute):
             'version': mage_info['version'],
             'features': [last_minute_normalized],  # lastMinute is of type Dict
             "include_features": 'false',
-            # {
-            #     "api_key": "PXWtegoZj4j1URTrh1VXFItET0vyzQYpAybkFszd",
-            #     "features": [last_minute_normalized],
-            #     "include_features": 'false',
-            #     "model": "custom_prediction_classification_1646563306246",
-            #     "version": "1" nm,sdfv kml,.sdfg jkml;sdx kl.dfghslsdf jnk.sdfg jkl;.dfg jnkl.g jnkl;sdsdfgn j.sdfg m,.sdfsdfg nsdxfg,.b.dxfxg.xcvb kl.xb kl.bxb .nkdxbnkml,.
             }),
     )
     print("API_RESPONSE", response.json())
     predictions = response.json()
+    print(predictions)
     return predictions[0]['prediction']
