@@ -16,6 +16,10 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQT, NavigationToolbar2
 from matplotlib.figure import Figure
 
 import main
+from notifier.notifier import notify
+
+handler = main.handler
+config = main.config
 
 
 class Worker(QObject):
@@ -25,8 +29,10 @@ class Worker(QObject):
     @Slot()
     def run(self):
         while True:
-            time.sleep(60)
-            main.run()
+            time.sleep(config["check_rate"])
+            api_resp = main.run()
+            if api_resp == 'distracted':
+                notify()
             print("tick")
 
     def stop(self):
@@ -217,10 +223,12 @@ class MainWindow(QMainWindow):
 
     def start_keylogger(self, pressed):
         if pressed:
+            handler.running = True
             self.btn.setText("Stop Focus Monitor")
             self.thread.start()
 
         else:
+            handler.running = False
             self.btn.setText("Start Focus Monitor")
             self.thread.terminate()
 

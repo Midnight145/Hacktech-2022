@@ -86,7 +86,6 @@ class Handler:
         # return json.dumps(frequency)
         return frequency
 
-
     def mouse_button_parse(self) -> dict:
         global db
         # converts each row from database response to dictionary, only returning values within check_rate
@@ -131,6 +130,7 @@ class Handler:
             rows["state"] = state
 
         rows["platform"] = helpers.PLATFORM
+
         try:
             with open(filename, "r") as file:
                 write_header = len(file.readlines()) == 0
@@ -145,7 +145,6 @@ class Handler:
             except:
                 pass
         return rows
-
 
     def safe_call(self, func: callable) -> Any:
         """
@@ -163,16 +162,19 @@ class Handler:
         return ret
 
 
-def test():
-    key_resp = helpers.call_api(create_mageinfo(), [key_dict])
-    mouse_resp = helpers.call_api(create_mageinfo(), [mouse_dict])
+def test(key_dict: dict, mouse_dict: dict):
+    key_resp = helpers.call_api(create_mageinfo(), key_dict)
+    print("testing...")
+    # mouse_resp = helpers.call_api(create_mageinfo(), [mouse_dict])
+
+    return key_resp
 
 
 def create_mageinfo():
-    mage_config = config["mage"]
+    mage_config = config["mage"][0]
+    print(mage_config)
     mage_obj = {"apiKey": mage_config["api_key"], "model": mage_config["model"], "version": mage_config["version"]}
     return mage_obj
-
 
 
 CONFIG_FILE = "config.json"
@@ -195,7 +197,6 @@ state = helpers.DISTRACTED
 
 
 def run():
-    #time.sleep(config["check_rate"])
     key_resp = handler.safe_call(handler.key_parse)
     if not helpers.PLATFORM == 'darwin':
         mouse_resp = handler.safe_call(handler.mouse_button_parse)
@@ -203,3 +204,5 @@ def run():
         mouse_resp = {}
     key_dict = handler.add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
     mouse_dict = handler.add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
+    handler.safe_call(handler.key_parse)
+    return test(key_dict, mouse_dict)

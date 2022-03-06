@@ -1,5 +1,4 @@
 import multiprocessing
-
 import zroya
 from multiprocessing import Process, Lock
 
@@ -13,7 +12,6 @@ zroya.init(
     sub_product="Windows_Notifier",
     version="v01"
 )
-
 notifier = zroya.Template(zroya.TemplateType.Text2)
 notifier.setFirstLine("Focus Check!")
 notifier.setSecondLine("Are you Distracted from Work?")
