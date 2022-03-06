@@ -1,5 +1,12 @@
 {
   "check_rate": 60,
+  "mage": [
+    {
+      "api_key": "",
+      "model": "",
+      "version": 0,
+      "url": "https://api.mage.ai/v1/predict"
+    }],
   "api_key": "",
   "api_model": "",
   "database_file": "focus.db",

@@ -1,12 +1,13 @@
 import json
 import requests
 
-def getResponse(MAGEinfo, lastMinute):
+MAGE_HEADERS = { 'Content-Type': 'application/json' }
+
+
+def call_api(MAGEinfo, lastMinute):
     response = requests.post(
         url='https://api.mage.ai/v1/predict',
-        headers={
-            'Content-Type': 'application/json',
-        },
+        headers=MAGE_HEADERS,
         data=json.dumps({
             'api_key': MAGEinfo['apiKey'],
             'model': MAGEinfo['model'],

@@ -1,3 +1,5 @@
+# needed packages: keyboard, mouse installed from latest git
+
 import sys
 import time
 import csv
@@ -122,7 +124,7 @@ class Handler:
 
         return frequency
 
-    def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> bool:
+    def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> dict:
         if len(rows) == 0:
             rows["state"] = helpers.EMPTY
         else:
@@ -140,9 +142,9 @@ class Handler:
                 writer.writeheader()
             try:
                 writer.writerow(rows)
-                return True
             except:
-                return False
+                pass
+        return rows
 
 
     def safe_call(self, func: callable) -> Any:
@@ -161,11 +163,23 @@ class Handler:
         return ret
 
 
+def test():
+    key_resp = helpers.call_api(create_mageinfo(), [key_dict])
+    mouse_resp = helpers.call_api(create_mageinfo(), [mouse_dict])
+
+
+def create_mageinfo():
+    mage_config = config["mage"]
+    mage_obj = {"apiKey": mage_config["api_key"], "model": mage_config["model"], "version": mage_config["version"]}
+    return mage_obj
+
+
 
 CONFIG_FILE = "config.json"
 
 with open(CONFIG_FILE, 'r') as config:
     config = json.load(config)
+
 
 DATABASE_FILE = config["database_file"]
 db = Database(DATABASE_FILE)
@@ -186,5 +200,5 @@ while True:
         mouse_resp = handler.safe_call(handler.mouse_button_parse)
     else:
         mouse_resp = {}
-    handler.add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
-    handler.add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
+    key_dict = handler.add_rows_to_csv(config["key_data_file"], helpers.KEY_HEADERS, key_resp, state)
+    mouse_dict = handler.add_rows_to_csv(config["mouse_data_file"], helpers.MOUSE_HEADERS, mouse_resp, state)
