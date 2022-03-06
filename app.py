@@ -11,15 +11,20 @@ class LoggerWorker(QObject):
         super(LoggerWorker, self).__init__()
         self.running = True
 
-    def start(self):
+    def start(self, handler):
         if not self.running:
             self.running = True
+
+        handler.running = True
 
         print("Running!")
         # Start Process Keylogger
 
-    def stop(self):
+
+    def stop(self, handler):
         self.running = False
+
+        handler.running = False
 
 
 class MainWindow(QMainWindow):
