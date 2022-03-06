@@ -203,7 +203,7 @@ class SessionPie(QWidget):
         self.chart = QChart()
         self.chart.legend().hide()
         self.chart.addSeries(self.series)
-        self.chart.setTitle("Overall Distractiveness")
+        self.chart.setTitle("Session Distractiveness")
 
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)
@@ -235,7 +235,7 @@ class SessionPie(QWidget):
             self.series.remove(self.Focused)
             self.Focused = QPieSlice("Focused", self.OPieList[1] / self.total)
             self.series.append(self.Focused)
-        else:
+        elif i == "distracted":
             self.OPieList[2] += 1
             self.series.remove(self.Distracted)
             self.Distracted = QPieSlice("Distracted", self.OPieList[2] / self.total)
