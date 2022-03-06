@@ -30,6 +30,9 @@ class Handler:
         if "option" in insertion_key:
             insertion_key = "alt"
 
+        if insertion_key in helpers.SPECIAL_MAP.keys():
+            insertion_key = helpers.SPECIAL_MAP[insertion_key]
+
         db.insert(table="keys", key=insertion_key, down=int(key.event_type == keyboard.KEY_DOWN), time=str(key.time))
 
     def mouse_callback(self, event: Union[mouse.ButtonEvent, mouse.MoveEvent, mouse.WheelEvent]) -> None:
@@ -170,7 +173,7 @@ keyboard.hook(lambda y: handler.safe_call(lambda: handler.keyboard_callback(y)))
 if not sys.platform == 'darwin':
     mouse.hook(lambda y: handler.safe_call(lambda: handler.mouse_callback(y)))
 
-state = "distracted"
+state = "focused"
 
 while True:
     time.sleep(config["check_rate"])
