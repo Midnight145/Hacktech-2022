@@ -6,6 +6,9 @@ if sys.platform == 'darwin':
 else:
     PLATFORM = 'windows'
 
+DISTRACTED = "distracted"
+FOCUSED = "focused"
+
 SPECIAL_MAP = {'!': "excla", '"': 'dquote', '#': 'pound', '$': 'dollar', '%': 'percent', '&': 'ampersand',
                '\'': 'squote', '(': 'lparen', ')': 'rparen', '*': 'asterisk', '+': 'plus', ',': 'comma', '-': 'minus',
                '.': 'period', '/': 'fslash', ':': 'colon', ';': 'semicolon', '<': 'lthan','=': 'equals', '>': 'gthan',
@@ -14,7 +17,7 @@ SPECIAL_MAP = {'!': "excla", '"': 'dquote', '#': 'pound', '$': 'dollar', '%': 'p
 
 KEY_HEADERS = list(string.printable.replace(string.ascii_uppercase, '')[:-6])
 KEY_HEADERS += ["esc", "enter", "delete", "ctrl", "left", "up", "right", "down", "backspace", "tab", "space", "windows",
-                "alt", "shift", 'insert', 'menu', 'lock', 'screen', 'end', 'pause', 'home', "ƒ", "other"]
+                "alt", "shift", 'insert', 'menu', 'lock', 'screen', 'end', 'pause', 'home', "other"]
 KEY_HEADERS.append('state')
 KEY_HEADERS.append('platform')
 for i in range(len(KEY_HEADERS)):
@@ -25,6 +28,3 @@ MOUSE_HEADERS = ["left_single", "left_double", "right_single", "right_double", "
                  "x_single", "x_double", "x2_single", "x2_double"]
 MOUSE_HEADERS.append('state')
 MOUSE_HEADERS.append('platform')
-
-# todo:  ,/,:,;,<,=,>,?,@,[,\,],^,_,`,{,|,},~
-# '\\': 'backslash',
