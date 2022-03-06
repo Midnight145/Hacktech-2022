@@ -119,7 +119,7 @@ class Handler:
 
         return frequency
 
-    def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> None:
+    def add_rows_to_csv(self, filename: str, headers: List[str], rows: dict, state: str) -> bool:
         rows["state"] = state
         rows["platform"] = helpers.PLATFORM
         try:
@@ -133,8 +133,9 @@ class Handler:
                 writer.writeheader()
             try:
                 writer.writerow(rows)
+                return True
             except:
-                return
+                return False
 
 
     def safe_call(self, func: callable) -> Any:
