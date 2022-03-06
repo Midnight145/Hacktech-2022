@@ -17,7 +17,7 @@ SPECIAL_MAP = {'!': "excla", '"': 'dquote', '#': 'pound', '$': 'dollar', '%': 'p
 
 KEY_HEADERS = list(string.printable.replace(string.ascii_uppercase, '')[:-6])
 KEY_HEADERS += ["esc", "enter", "delete", "ctrl", "left", "up", "right", "down", "backspace", "tab", "space", "windows",
-                "alt", "shift", 'insert', 'menu', 'lock', 'screen', 'end', 'pause', 'home', "ƒ", "other"]
+                "alt", "shift", 'insert', 'menu', 'lock', 'screen', 'end', 'pause', 'home', "other"]
 KEY_HEADERS.append('state')
 KEY_HEADERS.append('platform')
 for i in range(len(KEY_HEADERS)):
