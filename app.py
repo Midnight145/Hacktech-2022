@@ -78,6 +78,7 @@ class Graph(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self._chartView)
         self.setLayout(self.layout)
+        self.setGeometry(300, 300, 800, 400)
 
         self._timerId = self.startTimer(60000)
 
@@ -141,6 +142,7 @@ class OverallPie(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.chartview)
         self.setLayout(self.layout)
+        self.setGeometry(300, 300, 400, 400)
 
         self._timerId = self.startTimer(60000)
 
@@ -211,6 +213,7 @@ class SessionPie(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.chartview)
         self.setLayout(self.layout)
+        self.setGeometry(300, 300, 400, 400)
 
         self._timerId = self.startTimer(60000)
 
@@ -273,6 +276,8 @@ class MainWindow(QMainWindow):
         self.obj.moveToThread(self.thread)
         self.obj.finished.connect(self.thread.quit)
         self.thread.started.connect(self.obj.run)
+
+        self.setGeometry(300, 300, 390, 210)
 
     def show_opie(self):
         self.opie = OverallPie()
