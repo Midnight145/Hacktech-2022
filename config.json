@@ -2,9 +2,9 @@
   "check_rate": 60,
   "mage": [
     {
-      "api_key": "",
-      "model": "",
-      "version": 0,
+      "api_key": "MAGE_KEY",
+      "model": "MAGE_MODEL",
+      "version": 1,
       "url": "https://api.mage.ai/v1/predict"
     }],
   "api_key": "",
